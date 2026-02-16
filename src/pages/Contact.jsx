@@ -1,4 +1,7 @@
 import { useState } from 'react'
+import { createLead } from '../api'
+
+
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +12,8 @@ const Contact = () => {
     message: '',
   })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+const [error, setError] = useState(null)
 
   const handleChange = (e) => {
     setFormData({
@@ -17,34 +22,38 @@ const Contact = () => {
     })
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    // In a real application, this would send data to a backend
-    console.log('Form submitted:', formData)
+  const handleSubmit = async (e) => {
+  e.preventDefault()
+  setLoading(true)
+  setError(null)
+
+  try {
+    await createLead(formData)
     setSubmitted(true)
-    setTimeout(() => {
-      setSubmitted(false)
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        service: '',
-        message: '',
-      })
-    }, 5000)
+
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      service: '',
+      message: '',
+    })
+  } catch (err) {
+    setError(err.message)
+  } finally {
+    setLoading(false)
   }
+}
 
   const services = [
-    'Cybersecurity & ISMS',
-    'Data Privacy & DPDP Compliance',
-    'ISO Certifications',
-    'IT CSV & GxP Compliance',
-    'ERPNext Implementation',
-    'POSH Compliance',
-    'Environmental & Energy Audits',
-    'Training Programs',
-    'Other',
-  ]
+  'Cybersecurity Services',
+  'Data Privacy & Governance',
+  'ISO & Risk Consulting',
+  'Audit & Compliance Readiness',
+  'Collaboration Services',
+  'Training & Certifications',
+  'Other',
+]
 
   return (
     <div className="pt-20">
@@ -149,6 +158,8 @@ const Contact = () => {
                   </p>
                 </div>
               ) : (
+
+                
                 <form onSubmit={handleSubmit} className="space-y-6">
                   <div>
                     <label htmlFor="name" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -236,11 +247,16 @@ const Contact = () => {
                   </div>
 
                   <button
-                    type="submit"
-                    className="w-full bg-primary-teal text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg"
-                  >
-                    ✅ Submit & Schedule Consultation
-                  </button>
+  type="submit"
+  disabled={loading}
+  className="w-full bg-primary-teal text-white px-8 py-4 rounded-lg font-semibold text-lg hover:bg-opacity-90 transition-all shadow-md hover:shadow-lg disabled:opacity-60"
+>
+  {loading ? 'Submitting...' : '✅ Submit & Schedule Consultation'}
+</button>{error && (
+  <div className="bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-4">
+    {error}
+  </div>
+)}
                 </form>
               )}
             </div>
